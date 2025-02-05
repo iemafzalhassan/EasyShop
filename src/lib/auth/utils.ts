@@ -28,11 +28,13 @@ export const generateToken = async (payload: JWTPayload): Promise<string> => {
 
 export const verifyToken = async (token: string): Promise<JWTPayload | null> => {
   if (!token || token === 'undefined' || token === '[object Object]') {
+    console.log('Invalid token format:', token);
     return null;
   }
 
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
+    console.log('Token verified successfully:', payload);
     
     // Verify the token has the required fields
     if (!payload.userId || !payload.role) {
@@ -56,6 +58,7 @@ export const getTokenFromRequest = (request: NextRequest): string | null => {
     const authHeader = request.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
+      console.log('Found token in Authorization header');
       if (token && token !== 'undefined' && token !== '[object Object]') {
         return token;
       }
@@ -63,10 +66,14 @@ export const getTokenFromRequest = (request: NextRequest): string | null => {
 
     // Try to get token from cookie
     const token = request.cookies.get('token')?.value;
-    if (token && token !== 'undefined' && token !== '[object Object]') {
-      return token;
+    if (token) {
+      console.log('Found token in cookie');
+      if (token !== 'undefined' && token !== '[object Object]') {
+        return token;
+      }
     }
 
+    console.log('No valid token found in request');
     return null;
   } catch (error) {
     console.error('Error getting token from request:', error);

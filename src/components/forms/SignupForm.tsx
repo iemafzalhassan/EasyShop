@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { setAuthenticated } from "@/lib/features/auth/authSlice";
+import { setAuthenticated, setCurrentUser } from "@/lib/features/auth/authSlice";
 import fetchData from "@/lib/fetchDataFromApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -53,31 +53,41 @@ const SignupForm = ({ setIsOpen }: SignupFormProps) => {
     setIsLoading(true);
 
     try {
+      console.log('Submitting registration form:', values);
       const res = await fetchData.post("/auth/register", values);
-      await createCookies(res.data.token);
+      console.log('Registration response:', res.data);
+
       if (res.data.token) {
+        // First set the cookie
+        await createCookies(res.data.token);
+        
+        // Then update the auth state
         dispatch(setAuthenticated(true));
+        dispatch(setCurrentUser(res.data.user));
+
         toast({
           title: "Success",
           description: "You have successfully registered",
           variant: "success",
         });
-        router.push("/");
+
+        // Small delay to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         setIsLoading(false);
         setIsOpen && setIsOpen(false);
+        router.push("/");
       }
     } catch (error: any) {
-      console.log('Registration error:', error?.response?.data);
+      console.error('Registration error:', error?.response?.data);
       const errorMessage = error?.response?.data?.error || "Registration failed. Please try again.";
       
-      // Show error toast
       toast({
         title: "Registration failed",
         description: errorMessage,
         variant: "destructive",
       });
 
-      // Set form error if it's a validation error
       if (errorMessage.includes("email")) {
         form.setError("email", { message: errorMessage });
       } else if (errorMessage.includes("password")) {
