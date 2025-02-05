@@ -104,77 +104,129 @@ flowchart TD
 
 ## 🚀 Getting Started
 
+### Docker Setup Guide
+
+This guide will help you run EasyShop using Docker containers. No local Node.js or MongoDB installation required!
+
 ### Prerequisites
 
-> [!NOTE]
-> Make sure you have the following installed:
-> - Node.js (v18 or higher)
-> - npm (v9 or higher)
-> - MongoDB (v7 or higher)
+1. Install [Docker](https://docs.docker.com/get-docker/) on your machine
+2. Basic understanding of terminal/command line
 
-### Installation Steps
+### Step 1: Environment Setup
 
-1. Clone the repository
-```bash
-git clone https://github.com/iemafzalhassan/EasyShop.git
-cd EasyShop
+1. Create a file named `.env.local` in the root directory with the following content:
+```env
+# Database Configuration
+MONGODB_URI=mongodb://easyshop-mongodb:27017/easyshop
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret-key  # Generate this using the command below
+
+# JWT Configuration
+JWT_SECRET=your-jwt-secret-key  # Generate this using the command below
 ```
 
-2. Install dependencies
+To generate secure secret keys, use these commands in your terminal:
 ```bash
-npm install
+# For NEXTAUTH_SECRET
+openssl rand -base64 32
+
+# For JWT_SECRET
+openssl rand -hex 32
 ```
 
-3. Set up environment variables
+### Step 2: Running the Application
+
+Copy and paste these commands in your terminal one by one:
+
+1. Create a Docker network:
 ```bash
-cp .env.example .env.local
+docker network create easyshop-network
 ```
 
-> [!IMPORTANT]
-> Create a `.env.local` file in the root directory with the following configuration:
-> ```env
-> # Database Configuration
-> MONGODB_URI=mongodb://localhost:27017/easyshop
-> 
-> # Next.js Configuration
-> NEXTAUTH_URL=http://localhost:3000
-> NEXT_PUBLIC_API_URL=http://localhost:3000/api
-> 
-> # Authentication
-> JWT_SECRET=your-secure-jwt-secret-key
-> ```
-> 
-> **Note**: Replace `your-secure-jwt-secret-key` with a secure secret key for JWT token generation. 
-> You can generate one using [JWT Builder Tool](http://jwtbuilder.jamiekurtz.com/) or any other secure JWT generator.
-
-### Running the Application
-
-Follow these commands in sequence:
-
-1. First, run the database migrations to set up your database with initial data:
+2. Start MongoDB:
 ```bash
-npm run migrate
+docker run -d \
+  --name easyshop-mongodb \
+  --network easyshop-network \
+  -p 27017:27017 \
+  -v mongodb_data:/data/db \
+  mongo:latest
 ```
 
-2. For development:
+3. Build the main application:
 ```bash
-# Start the development server with hot reload
-npm run dev
+docker build -t easyshop .
 ```
 
-3. For production:
+4. Build and run data migration:
 ```bash
-# Build the application
-npm run build
+# Build migration image
+docker build -t easyshop-migration -f scripts/Dockerfile.migration .
 
-# Start the production server
-npm start
+# Run migration
+docker run --rm \
+  --network easyshop-network \
+  --env-file .env.local \
+  easyshop-migration
 ```
 
-> [!NOTE]
-> - Development server runs on: http://localhost:3000
-> - The migrate command only needs to be run once when setting up the project
-> - Always run `npm run build` before `npm start` in production
+5. Start the EasyShop application:
+```bash
+docker run -d \
+  --name easyshop \
+  --network easyshop-network \
+  -p 3000:3000 \
+  --env-file .env.local \
+  easyshop:latest
+```
+
+### Accessing the Application
+
+1. Open your web browser
+2. Visit [http://localhost:3000](http://localhost:3000)
+3. You should see the EasyShop homepage!
+
+### Useful Docker Commands
+
+```bash
+# View running containers
+docker ps
+
+# View container logs
+docker logs easyshop
+docker logs easyshop-mongodb
+
+# Stop containers
+docker stop easyshop easyshop-mongodb
+
+# Remove containers
+docker rm easyshop easyshop-mongodb
+
+# Remove network
+docker network rm easyshop-network
+```
+
+### Troubleshooting
+
+1. If you can't connect to MongoDB:
+   - Make sure the MongoDB container is running: `docker ps`
+   - Check MongoDB logs: `docker logs easyshop-mongodb`
+   - Verify network connection: `docker network inspect easyshop-network`
+
+2. If the application isn't accessible:
+   - Check if the container is running: `docker ps`
+   - View application logs: `docker logs easyshop`
+   - Make sure port 3000 isn't being used by another application
+
+3. If migration fails:
+   - Check if MongoDB is running and accessible
+   - View migration logs when running the migration command
+   - Verify your .env.local file has the correct MongoDB URI
+
+For any other issues, please create a GitHub issue with the error details.
 
 ## 🧪 Testing
 

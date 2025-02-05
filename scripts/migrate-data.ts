@@ -1,13 +1,9 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import mongoose from 'mongoose';
-import { fileURLToPath } from 'url';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/easyshop';
-
-// Get current file directory in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://easyshop-mongodb:27017/easyshop';
+const scriptDir = path.resolve(path.dirname(''));
 
 // Product Schema
 const productSchema = new mongoose.Schema({
@@ -54,9 +50,15 @@ function getImagePath(originalPath: string, shopCategory: string): string {
 
 async function migrateData() {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(MONGODB_URI);
-    console.log('Connected to MongoDB');
+    console.log('Attempting to connect to MongoDB at:', MONGODB_URI);
+    
+    // Connect to MongoDB with options
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s
+    });
+    
+    console.log('Successfully connected to MongoDB');
 
     // Get the project root directory (one level up from scripts)
     const projectRoot = path.resolve(__dirname, '..');
