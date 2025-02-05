@@ -1,7 +1,9 @@
 import axios from "axios";
 
-// Get the base URL from environment or default to localhost in development
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+// Get the base URL from environment or use window.location.origin in the browser
+const baseURL = typeof window !== 'undefined' 
+  ? `${window.location.origin}/api`
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api');
 
 export const axiosInstance = axios.create({
   baseURL,

@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 
 export async function createCookies(token: string) {
+  const url = new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000');
   cookies().set({
     name: "token",
     value: token,
@@ -10,6 +11,7 @@ export async function createCookies(token: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    domain: url.hostname === 'localhost' ? 'localhost' : url.hostname,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   });
 }

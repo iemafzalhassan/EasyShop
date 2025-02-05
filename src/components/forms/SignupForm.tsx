@@ -67,12 +67,23 @@ const SignupForm = ({ setIsOpen }: SignupFormProps) => {
         setIsOpen && setIsOpen(false);
       }
     } catch (error: any) {
-      console.log(error);
+      console.log('Registration error:', error?.response?.data);
+      const errorMessage = error?.response?.data?.error || "Registration failed. Please try again.";
+      
+      // Show error toast
       toast({
-        title: "Signup failed",
-        description: error?.response?.data || "Register failed",
+        title: "Registration failed",
+        description: errorMessage,
         variant: "destructive",
       });
+
+      // Set form error if it's a validation error
+      if (errorMessage.includes("email")) {
+        form.setError("email", { message: errorMessage });
+      } else if (errorMessage.includes("password")) {
+        form.setError("password", { message: errorMessage });
+      }
+      
       setIsLoading(false);
     }
   }

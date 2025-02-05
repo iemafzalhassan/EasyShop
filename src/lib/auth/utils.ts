@@ -51,19 +51,27 @@ export const verifyToken = async (token: string): Promise<JWTPayload | null> => 
 };
 
 export const getTokenFromRequest = (request: NextRequest): string | null => {
-  // Try to get token from Authorization header
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    return authHeader.substring(7);
-  }
+  try {
+    // Try to get token from Authorization header
+    const authHeader = request.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      if (token && token !== 'undefined' && token !== '[object Object]') {
+        return token;
+      }
+    }
 
-  // Try to get token from cookie
-  const token = request.cookies.get('token')?.value;
-  if (token && token !== 'undefined' && token !== '[object Object]') {
-    return token;
-  }
+    // Try to get token from cookie
+    const token = request.cookies.get('token')?.value;
+    if (token && token !== 'undefined' && token !== '[object Object]') {
+      return token;
+    }
 
-  return null;
+    return null;
+  } catch (error) {
+    console.error('Error getting token from request:', error);
+    return null;
+  }
 };
 
 export const isAuthenticated = async (request: NextRequest) => {

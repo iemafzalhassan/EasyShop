@@ -121,12 +121,16 @@ This guide will help you run EasyShop using Docker containers. No local Node.js 
 MONGODB_URI=mongodb://easyshop-mongodb:27017/easyshop
 
 # NextAuth Configuration
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://your-ec2-ip:3000  # Replace with your EC2 instance's public IP
+NEXT_PUBLIC_API_URL=http://your-ec2-ip:3000/api  # Replace with your EC2 instance's public IP
 NEXTAUTH_SECRET=your-nextauth-secret-key  # Generate this using the command below
 
 # JWT Configuration
 JWT_SECRET=your-jwt-secret-key  # Generate this using the command below
 ```
+
+> [!IMPORTANT]
+> When deploying to EC2, make sure to replace `your-ec2-ip` with your actual EC2 instance's public IP address.
 
 To generate secure secret keys, use these commands in your terminal:
 ```bash
@@ -139,7 +143,26 @@ openssl rand -hex 32
 
 ### Step 2: Running the Application
 
-Copy and paste these commands in your terminal one by one:
+You have two options to run the application:
+
+#### Option 1: Using Docker Compose (Recommended)
+
+This is the easiest way to run the application. All services will be started in the correct order with proper dependencies.
+
+```bash
+# Start all services
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop all services
+docker compose down
+```
+
+#### Option 2: Manual Docker Commands
+
+If you prefer more control, you can run each service manually:
 
 1. Create a Docker network:
 ```bash
