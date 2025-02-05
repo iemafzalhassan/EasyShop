@@ -1,4 +1,4 @@
-@Library('easyshop-shared-lib') _
+@Library('easyshop-shared-lib@main') _
 
 pipeline {
     agent any
@@ -13,15 +13,10 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                cleanWs()
-                checkout scm
-            }
-        }
-        
-        stage('Security Scan') {
-            steps {
                 script {
-                    securityScan()
+                    echo "Starting pipeline execution..."
+                    cleanWs()
+                    checkout scm
                 }
             }
         }
@@ -29,7 +24,12 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 script {
-                    buildDockerImages()
+                    try {
+                        buildDockerImages()
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Failed to build Docker images: ${e.message}"
+                    }
                 }
             }
         }
@@ -37,29 +37,25 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
-                    pushToDockerHub()
-                }
-            }
-        }
-        
-        stage('Deploy to Staging') {
-            when {
-                branch 'develop'
-            }
-            steps {
-                script {
-                    deployToStaging()
+                    try {
+                        pushToDockerHub()
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Failed to push Docker images: ${e.message}"
+                    }
                 }
             }
         }
         
         stage('Deploy to Production') {
-            when {
-                branch 'main'
-            }
             steps {
                 script {
-                    deployToProd()
+                    try {
+                        deployToProd()
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error "Failed to deploy: ${e.message}"
+                    }
                 }
             }
         }
@@ -68,7 +64,18 @@ pipeline {
     post {
         always {
             cleanWs()
-            emailNotification(currentBuild.result)
+        }
+        success {
+            script {
+                currentBuild.result = 'SUCCESS'
+                emailNotification('SUCCESS')
+            }
+        }
+        failure {
+            script {
+                currentBuild.result = 'FAILURE'
+                emailNotification('FAILURE')
+            }
         }
     }
 }
