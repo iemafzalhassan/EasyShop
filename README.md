@@ -121,8 +121,8 @@ This guide will help you run EasyShop using Docker containers. No local Node.js 
 MONGODB_URI=mongodb://easyshop-mongodb:27017/easyshop
 
 # NextAuth Configuration
-NEXTAUTH_URL=http://your-ec2-ip:3000  # Replace with your EC2 instance's public IP
-NEXT_PUBLIC_API_URL=http://your-ec2-ip:3000/api  # Replace with your EC2 instance's public IP
+NEXTAUTH_URL=http://localhost:3000  # Replace with your EC2 instance's public IP or put localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3000/api  # Replace with your EC2 instance's public IP or put localhost:3000/api
 NEXTAUTH_SECRET=your-nextauth-secret-key  # Generate this using the command below
 
 # JWT Configuration
