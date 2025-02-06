@@ -9,7 +9,6 @@ This guide provides step-by-step instructions for setting up a Jenkins CI/CD pip
 - [GitHub Webhook Setup](#github-webhook-setup)
 - [Pipeline Configuration](#pipeline-configuration)
 - [Shared Library Integration](#shared-library-integration)
-- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -154,25 +153,6 @@ Our pipeline includes these stages:
 4. Deploy to Production: Deploys the application
 5. Email Notification: Sends build status
 
-## Troubleshooting
-
-### Common Issues
-
-1. Webhook Not Triggering:
-   - Verify Jenkins URL is accessible
-   - Check webhook payload URL
-   - Review GitHub webhook logs
-
-2. Build Failures:
-   - Check Jenkins console output
-   - Verify Docker Hub credentials
-   - Ensure Docker daemon is running
-
-3. Deployment Issues:
-   - Verify port availability
-   - Check container logs
-   - Ensure sufficient permissions
-
 ### Logs Location
 
 Important log locations:
@@ -180,21 +160,6 @@ Important log locations:
 - Docker logs: `docker logs container-name`
 - Build logs: Available in Jenkins job console output
 
-## Support
-
-For issues or questions:
-1. Check Jenkins console output
-2. Review pipeline syntax
-3. Examine shared library functions
-4. Contact the DevOps team
-
-## Security Notes
-
-- Keep Jenkins updated
-- Regularly rotate credentials
-- Use secure HTTPS for webhooks
-- Implement proper access controls
-- Monitor system resources
 
 ## References
 
